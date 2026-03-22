@@ -1,0 +1,17 @@
+
+
+# 数据集路径，修改为个人存放数据集的路径下
+path: E:\bishe\data\yolo
+
+
+# 训练我提供的数据集，以下内容不需要改动；训练自己的数据集，根据个人情况修改
+train:
+  - train
+val:
+  - val
+test:
+  - test
+
+# 类别名称，不支持中文
+names:
+  ["crazing", "inclusion", "patches", "pitted_surface", "rolled-in_scale", "scratches"]

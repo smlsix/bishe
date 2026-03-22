@@ -1,0 +1,67 @@
+# 模型相关的配置文件
+MODEL:
+  # 模型文件
+  WEIGHT: './weights/yolov8s-attention-SE/weights/best.pt'
+  # 阈值
+  CONF: 0.4
+  # 图片大小
+  IMGSIZE: 640
+
+
+UI:
+  # 背景图片
+  background: './icon/background.jpg'
+  # 主图
+  zhutu2: './icon/zhutu2.png'
+  # 最上方的名称
+  title: '钢铁缺陷检测系统'
+  # 标题
+  label_title: '钢铁缺陷检测系统'
+  # 标题字体颜色
+  label_title_color: "255, 255, 255"
+  # 开始识别按钮背景颜色
+  start_button_bg: "93,98,194"
+  # 开始识别按钮字体颜色
+  start_button_font: "255, 255, 255"
+  # 导出数据按钮颜色
+  export_button_bg: "93,98,194"
+  # 导出数据按钮字体颜色
+  export_button_font: "255, 255, 255"
+  # 图片填充 RGB格式
+  padvalue: [ 85,95,114 ]
+  # 表格中字体的颜色 RGB格式
+  column_color: [ 0, 0, 0 ]
+  # 左侧控制区域颜色 RGBA
+  label_control_color: "122, 135, 154, 100"
+  # 主图区域颜色
+  label_img_color:  "122, 135, 154, 150"
+  # 表格相关
+  # 表格每列的宽度
+  column_widths: [ 50, 220, 120, 200, 80, 80, 140 ]
+  table_widget_info_styles:
+    # 表头背景
+    header_background_color: "93,98,194"
+    # 表头字体
+    header_color: "white"
+    # 表格背景
+    background_color: "54, 63, 70"
+    # 滑过背景
+    item_hover_background_color: "152,155,232"
+
+
+CONFIG:
+  # 摄像头id
+  camera_num: 0
+  # 界面是否显示摄像头识别功能， False: 不显示  True: 显示
+  show_camera: True
+  # 是否显示中文 False: 显示英文标签  True: 显示中文标签
+  draw_chinese: True
+  chinese_name: {
+    'crazing': '疯纹',
+    'inclusion': '夹杂物',
+    'patches': '斑块',
+    'pitted_surface': '凹凸表面',
+    'rolled-in_scale': '轧辊印痕',
+    'scratches': '划痕',
+    '无目标': '无目标' }
+
