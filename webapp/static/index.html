@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢铁缺陷检测工作台</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">STEEL DEFECT WEB WORKBENCH</p>
+                <h1>钢铁缺陷检测</h1>
+                <p class="hero-text">
+                    计算机一班 | 苏明亮 | 2024.06.10<br>
+                </p>
+            </div>
+
+            <aside class="hero-side panel-glass">
+                <div class="status-line">
+                    <span>服务状态</span>
+                    <span class="status-pill online" id="health-status">检查中</span>
+                </div>
+                <div class="status-grid">
+                    <div>
+                        <span class="metric-label">运行设备</span>
+                        <strong id="service-device">读取中</strong>
+                    </div>
+                    <div>
+                        <span class="metric-label">历史条数</span>
+                        <strong id="history-count">0</strong>
+                    </div>
+                    <div>
+                        <span class="metric-label">默认阈值</span>
+                        <strong id="default-confidence">-</strong>
+                    </div>
+                    <div>
+                        <span class="metric-label">默认尺寸</span>
+                        <strong id="default-image-size">-</strong>
+                    </div>
+                </div>
+            </aside>
+        </header>
+
+        <section class="control-strip panel">
+            <div class="control-head">
+                <div>
+                    <p class="panel-kicker">GLOBAL CONTROL</p>
+                    <h2>模型与参数</h2>
+                </div>
+                <div class="action-row">
+                    <button class="ghost-button" id="refresh-info-button" type="button">刷新信息</button>
+                    <button class="ghost-button" id="export-csv-button" type="button">导出 CSV</button>
+                    <button class="ghost-button" id="export-xls-button" type="button">导出 XLS</button>
+                </div>
+            </div>
+            <div class="form-grid">
+                <label class="field">
+                    <span>模型切换</span>
+                    <select id="global-model"></select>
+                </label>
+                <label class="field">
+                    <span>置信度阈值</span>
+                    <input id="global-confidence" type="number" min="0" max="1" step="0.05" placeholder="默认配置">
+                </label>
+                <label class="field">
+                    <span>输入尺寸</span>
+                    <input id="global-image-size" type="number" min="32" step="32" placeholder="默认配置">
+                </label>
+            </div>
+        </section>
+
+        <main class="dashboard">
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="panel-kicker">IMAGE MODE</p>
+                        <h2>图片处理</h2>
+                    </div>
+                    <p class="panel-tip">
+                        单张图片和批量图片共用同一个上传入口。多选图片后会自动进入批量处理，
+                        并且主预览区、检测表和结果文件会联动到你当前查看的那一张图片。
+                    </p>
+                </div>
+
+                <form id="image-form" class="stack-form">
+                    <label class="upload-zone" for="image-input">
+                        <input id="image-input" type="file" accept="image/*" multiple hidden>
+                        <span class="upload-title">上传单张或多张图片</span>
+                        <span class="upload-subtitle">支持 JPG / JPEG / PNG，多选时自动切换为批量处理</span>
+                        <span class="upload-filename" id="image-selected-name">尚未选择文件</span>
+                    </label>
+                    <button class="primary-button" id="image-submit-button" type="submit">开始图片处理</button>
+                </form>
+
+                <div class="media-grid">
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>原图预览</span>
+                            <span id="image-preview-meta">等待上传</span>
+                        </div>
+                        <img id="image-preview" alt="图片原图预览">
+                    </div>
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>结果预览</span>
+                            <span id="image-result-status">未开始</span>
+                        </div>
+                        <img id="image-result" alt="图片检测结果">
+                    </div>
+                </div>
+
+                <div class="image-nav">
+                    <button class="ghost-button" id="image-prev-button" type="button" disabled>上一张</button>
+                    <span class="image-nav-status" id="image-nav-status">等待批量结果</span>
+                    <button class="ghost-button" id="image-next-button" type="button" disabled>下一张</button>
+                </div>
+
+                <div class="stats-grid" id="image-stats">
+                    <article class="stat-card">
+                        <span>图片数量</span>
+                        <strong id="image-file-count">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>目标数量</span>
+                        <strong id="image-count">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>总耗时</span>
+                        <strong id="image-latency">0 s</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>FPS</span>
+                        <strong id="image-fps">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>类别统计</span>
+                        <strong id="image-class-summary">-</strong>
+                    </article>
+                </div>
+
+                <div class="link-row" id="image-links"></div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>图片</th>
+                                <th>检测数</th>
+                                <th>类别统计</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="image-batch-body">
+                            <tr>
+                                <td colspan="4" class="empty-row">还没有图片处理结果</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>类别</th>
+                                <th>置信度</th>
+                                <th>边框坐标</th>
+                            </tr>
+                        </thead>
+                        <tbody id="image-table-body">
+                            <tr>
+                                <td colspan="4" class="empty-row">还没有检测结果</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="panel-kicker">VIDEO MODE</p>
+                        <h2>视频检测</h2>
+                    </div>
+                    <p class="panel-tip">会自动保存原视频、结果视频、逐帧 CSV 和元数据。</p>
+                </div>
+
+                <form id="video-form" class="stack-form">
+                    <label class="upload-zone" for="video-input">
+                        <input id="video-input" type="file" accept="video/*" hidden>
+                        <span class="upload-title">上传检测视频</span>
+                        <span class="upload-subtitle">支持常见 MP4 / AVI</span>
+                        <span class="upload-filename" id="video-selected-name">尚未选择文件</span>
+                    </label>
+                    <button class="primary-button" id="video-submit-button" type="submit">开始视频检测</button>
+                </form>
+
+                <div class="media-grid video-grid">
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>结果视频</span>
+                            <span id="video-result-status">未开始</span>
+                        </div>
+                        <video id="video-result" controls playsinline></video>
+                    </div>
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>首帧预览</span>
+                            <span id="video-preview-meta">等待处理</span>
+                        </div>
+                        <img id="video-preview-image" alt="视频结果首帧预览">
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span>总检测数</span>
+                        <strong id="video-count">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>处理帧数</span>
+                        <strong id="video-frames">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>总耗时</span>
+                        <strong id="video-latency">0 s</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>处理 FPS</span>
+                        <strong id="video-fps">0</strong>
+                    </article>
+                </div>
+
+                <div class="link-row" id="video-links"></div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="panel-kicker">CAMERA MODE</p>
+                        <h2>摄像头实时检测</h2>
+                    </div>
+                    <p class="panel-tip">浏览器会周期性抓帧发送到后端，当前实现会自动把每次检测帧写入历史。</p>
+                </div>
+
+                <div class="camera-controls">
+                    <button class="ghost-button" id="camera-open-button" type="button">打开摄像头</button>
+                    <button class="primary-button" id="camera-start-button" type="button">开始实时检测</button>
+                    <button class="ghost-button" id="camera-stop-button" type="button">停止检测</button>
+                    <button class="ghost-button" id="camera-close-button" type="button">关闭摄像头</button>
+                </div>
+
+                <div class="media-grid">
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>摄像头画面</span>
+                            <span id="camera-live-status">等待打开</span>
+                        </div>
+                        <video id="camera-live" autoplay playsinline muted data-ready="false"></video>
+                    </div>
+                    <div class="media-card">
+                        <div class="media-head">
+                            <span>检测结果</span>
+                            <span id="camera-result-status">未开始</span>
+                        </div>
+                        <img id="camera-result" alt="摄像头检测结果">
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span>当前目标数</span>
+                        <strong id="camera-count">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>推理耗时</span>
+                        <strong id="camera-latency">0 s</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>FPS</span>
+                        <strong id="camera-fps">0</strong>
+                    </article>
+                    <article class="stat-card">
+                        <span>状态</span>
+                        <strong id="camera-loop-status">空闲</strong>
+                    </article>
+                </div>
+            </section>
+
+            <section class="panel history-panel">
+                <div class="panel-head">
+                    <div>
+                        <p class="panel-kicker">HISTORY</p>
+                        <h2>历史记录</h2>
+                    </div>
+                    <div class="action-row">
+                        <button class="ghost-button" id="refresh-history-button" type="button">刷新历史</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap history-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>类型</th>
+                                <th>来源</th>
+                                <th>模型</th>
+                                <th>检测数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr>
+                                <td colspan="6" class="empty-row">历史记录读取中</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js" defer></script>
+</body>
+</html>

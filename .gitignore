@@ -5,20 +5,24 @@ __pycache__/
 *.pyd
 *.so
 *.egg-info/
+build/
+dist/
+pip-wheel-metadata/
+
+# Test and lint caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 .coverage.*
 htmlcov/
-build/
-dist/
 
 # Virtual environments
 .venv/
 venv/
 env/
 ENV/
+.python-version
 
 # IDE and OS files
 .idea/
@@ -27,17 +31,20 @@ ENV/
 *.swo
 Thumbs.db
 Desktop.ini
+.DS_Store
 
-# Logs
+# Logs and temp files
 *.log
+*.tmp
+*.temp
 
-# YOLO / training outputs
-runs/
+# Generated outputs
 output/
-weights/
+runs/
 events.out.tfevents.*
 
 # Model artifacts
+weights/
 *.pt
 *.onnx
 *.engine

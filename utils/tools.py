@@ -5,7 +5,11 @@ import colorsys
 import os
 import platform
 import subprocess
+from pathlib import Path
 from PIL import ImageFont, ImageDraw, Image
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def print_model_info(metrics, model_path):
@@ -208,7 +212,7 @@ def draw_info(frame, results, draw_chinese=False, chinese_name=None):
     """
     绘制检测框和标签，保证文字整体对齐统一、美观，适合论文图片
     """
-    CHINESE_FONT_PATH = 'fonts/Arial.Unicode.ttf'
+    CHINESE_FONT_PATH = str(PROJECT_ROOT / 'fonts' / 'Arial.Unicode.ttf')
     img_h, img_w = frame.shape[:2]
 
     for i, bbox in enumerate(results):

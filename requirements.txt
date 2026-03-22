@@ -1,0 +1,29 @@
+# Core
+numpy
+opencv-python
+Pillow
+PyYAML
+easydict
+requests
+tqdm
+psutil
+scipy
+matplotlib
+pandas
+seaborn
+py-cpuinfo
+
+# Deep learning
+torch
+torchvision
+timm
+thop
+
+# Desktop UI
+PyQt5
+xlwt
+
+# Web UI
+fastapi
+uvicorn
+python-multipart
