@@ -215,3 +215,64 @@ output/webapp/
 - 课程设计
 - 缺陷检测演示系统
 - YOLOv8 二次开发练习
+
+## Vue Frontend + Login Database (Update: 2026-04-16)
+
+This project now includes a full-stack web upgrade:
+
+- Frontend: `Vue 3 + Vite` (source code in `frontend-vue/`)
+- Backend: `FastAPI`
+- User/Login database: `SQLite` (stored under `output/webapp/auth/auth.db`)
+- Auth mode: Bearer token, all inference/history APIs require login
+- User audit: every inference request is recorded into DB audit logs
+
+### Frontend source and build
+
+```bash
+cd frontend-vue
+npm install
+npm run build
+```
+
+The build output is generated to:
+
+```text
+webapp/static/vue/
+```
+
+Backend `/` will automatically serve this Vue app when `webapp/static/vue/index.html` exists.
+
+### Run backend
+
+```bash
+python run_web.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
+### First-time usage
+
+1. Open login page
+2. If no user exists, go to register
+3. After login, access dashboard for image/video inference, history, and personal audit logs
+
+### Multi-page navigation (new)
+
+After login, the Vue frontend is now split into multiple pages:
+
+- Overview
+- Image detection
+- Video detection
+- Camera real-time detection
+- History and audit
+- Model performance comparison
+- Account settings
+
+### Model performance comparison logic
+
+- If user has used 2 or more models: show comparison charts
+- If user has only used 1 model: show single-model performance panel
